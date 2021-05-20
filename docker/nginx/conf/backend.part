@@ -1,0 +1,79 @@
+error_log  /etc/logs/nginx/nginx_error.log;
+access_log /etc/logs/nginx/nginx_access.log;
+index index.php;
+root /app/public;
+
+client_max_body_size 50m;
+
+gzip            on;
+gzip_comp_level 9;
+gzip_types      text/css text/javascript application/x-javascript application/xml application/json;
+gzip_proxied    expired no-cache no-store private auth;
+
+location ~* /docs/.+.(jpg|jpeg|png|css|js)$ {
+    access_log off;
+    try_files $uri $uri/ /index.php?$query_string;
+    access_log off;
+    expires 365d;
+}
+
+location ~* \.(?:jpg|jpeg|gif|png|ico|css|js|ttf|otf|woff|cur|gz|svg|svgz|mp4|ogg|ogv|webm)$ {
+    access_log off;
+    add_header Cache-Control "public";
+    expires 365d;
+}
+
+location / {
+    add_header Access-Control-Expose-Headers "Origin" always;
+    add_header 'Access-Control-Allow-Origin' '*' always;
+    add_header Access-Control-Allow-Credentials "true" always;
+    add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT' always;
+    add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range' always;
+
+    if ($request_method = 'OPTIONS') {
+        add_header Access-Control-Expose-Headers "Origin" always;
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header Access-Control-Allow-Credentials "true" always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range' always;
+
+        add_header 'Access-Control-Max-Age' 1728000;
+        add_header 'Content-Type' 'text/plain; charset=utf-8';
+        add_header 'Content-Length' 0;
+        return 204;
+    }
+
+    try_files $uri $uri/ /index.php?$query_string;
+}
+
+location ~ \.php$ {
+
+    add_header Access-Control-Expose-Headers "Origin" always;
+    add_header 'Access-Control-Allow-Origin' '*' always;
+    add_header Access-Control-Allow-Credentials "true" always;
+    add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT' always;
+    add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range' always;
+
+    if ($request_method = 'OPTIONS') {
+        add_header Access-Control-Expose-Headers "Origin" always;
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header Access-Control-Allow-Credentials "true" always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range' always;
+
+        add_header 'Access-Control-Max-Age' 1728000;
+        add_header 'Content-Type' 'text/plain; charset=utf-8';
+        add_header 'Content-Length' 0;
+        return 204;
+    }
+
+    try_files $uri =404;
+
+    fastcgi_pass php:9000;
+    fastcgi_index index.php;
+    fastcgi_split_path_info ^(.+\.php)(/.*)$;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+    fastcgi_param DOCUMENT_ROOT $realpath_root;
+    fastcgi_param PATH_INFO $fastcgi_path_info;
+}

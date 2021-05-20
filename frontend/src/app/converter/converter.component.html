@@ -1,0 +1,41 @@
+<section class="align-content-center">
+
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>From</mat-label>
+      <mat-select name="from_currency" ngDefaultControl [ngModel]='model.from_currency'
+                  (ngModelChange)='setCurrency("from_currency", $event)'>
+        <mat-option *ngFor="let currency of currencies" [value]="currency.name">
+          {{currency.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="p-3">
+      <input matInput type="number" id="from_amount" [ngModel]='model.from_amount'
+             (ngModelChange)='setAmount("from_amount", $event)' placeholder="Amount" value="">
+    </mat-form-field>
+  </div>
+
+  <div>
+    Rate: <span>{{model.rate}}</span>
+  </div>
+
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>To</mat-label>
+      <mat-select name="to_currency" ngDefaultControl [ngModel]='model.to_currency'
+                  (ngModelChange)='setCurrency("to_currency", $event)'>
+        <mat-option *ngFor="let currency of currencies" [value]="currency.name">
+          {{currency.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="p-3">
+      <input matInput type="number" id="to_amount" [ngModel]='model.to_amount'
+             (ngModelChange)='setAmount("to_amount", $event)' placeholder="Amount" value="">
+    </mat-form-field>
+  </div>
+
+</section>

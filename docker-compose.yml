@@ -1,0 +1,66 @@
+version: '3.7'
+
+services:
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    restart: on-failure:5
+    ports:
+      - "833:80"
+      - "835:81"
+      - "333:3000"
+    volumes:
+      - ./frontend:/var/www/frontend
+      - ./public:/app/public
+      - ./var/log/nginx:/etc/logs/nginx
+      - ./docker/nginx/conf:/etc/nginx/conf.d
+    command: bash -c 'nginx -g "daemon off;"' && npm run-script build #  && npm run build && npm start     npm run-script build &&
+    networks:
+      - converter
+
+  php:
+    build:
+      dockerfile: docker/php/Dockerfile
+      context: .
+      target: php
+    restart: on-failure:5
+    volumes:
+      - ./:/app
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "233:22"
+    networks:
+      - converter
+
+  postgres:
+    image: postgres:13.2
+    ports:
+      - "533:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: on-failure:5
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_USER=converter
+      - POSTGRES_PASSWORD=converter
+    networks:
+      - converter
+
+  redis:
+    image: redis:alpine
+    command: redis-server --appendonly yes
+    restart: on-failure:5
+    ports:
+      - "633:6379"
+    networks:
+      - converter
+
+networks:
+  converter:
+
+volumes:
+  db_data:
